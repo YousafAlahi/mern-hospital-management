@@ -1,7 +1,112 @@
+import { useState, useContext } from "react";
+import { Link, useNavigate } from 'react-router-dom';
+import { BASE_URL } from "../config";
+import { toast } from "react-toastify";
+import {authContext} from '../context/AuthContext.jsx'
+import HashLoader from 'react-spinners/HashLoader'
 
 const Login = () => {
+
+
+const [formData, setFormData] = useState({
+  email: '',
+  password: ''
+})
+
+const [loading, setLoading] = useState(false)
+const navigate = useNavigate()
+const {dispatch} = useContext(authContext)
+
+const handleInputChange = (e) => {
+  setFormData({...formData, [e.target.name]: e.target.value})
+};
+
+
+const submitHandler = async (event) => {
+  // console.log(formData); // add new commit of code
+  event.preventDefault();
+  setLoading(true) // add new line of code
+
+  try {
+    const res = await fetch(`${BASE_URL}/auth/login`,{
+      method : 'post',
+      headers: {
+        'Content-Type' : 'application/json'
+      },
+      body: JSON.stringify(FormData)
+    })
+
+    const result = await res.json()
+
+    if(!res.ok){
+      throw new Error(result.message)
+    }
+
+    dispatch({
+      type: 'LOGIN_SUCCESS',
+      payload: {
+        user : result.data,
+        role: result.role,
+        token : result.token
+      },
+    });
+
+    console.log(result, 'login data')
+
+
+    setLoading(false)
+    toast.Success(result.message)
+    navigate('/home')
+
+  } catch (error) {
+    toast.error(err.message)
+    setLoading(false)
+  } // add new line of code
+};
+
+
   return (
-    <div>Login</div>
+   <section className="px-3 lg:px-0">
+    <div className="w-full max-w-[570px] mx-auto rounded-lg shadow-md md:p-10">
+      <h3 className="text-heading text-[22px] leading-9 font-bold mb-10">
+        Hello!<span className="text-iris-blue">Wellcome</span>Back</h3>
+
+        <form className="py-4 md:py-0" onSubmit={submitHandler}>
+          <div className="mb-5">
+            <input
+             type="email" 
+             name="email" 
+             placeholder="Enter Your Email" 
+             value={formData.email} onChange={handleInputChange}
+             className="w-full py-3 border-b border-solid border-[#0066ff61] focus:outline-none focus:border-b-primary
+            text-[22px] leading-7 text-heading placeholder:text-text cursor-pointer"
+             />
+          </div>
+
+          <div className="mb-5">
+            <input
+             type="password" 
+             name="password" 
+             placeholder="Password" 
+             value={formData.password} onChange={handleInputChange}
+             className="w-full py-3 border-b border-solid border-[#0066ff61] focus:outline-none focus:border-b-primary
+            text-[22px] leading-7 text-heading placeholder:text-text cursor-pointer"
+             />
+          </div>
+
+          <div className="mt-7">
+            <button type="submit" className="w-full bg-primary text-white leading-[30px] rounded-lg px-4 py-3">
+           {loading ? <HashLoader size={25} color={#fff}/> :' Login'}
+            </button>
+          </div>
+
+          <p className="mt-5 text-text text-center">
+            Don&apos;t have an account
+            <Link to='/register' className="text-primary font-medium ml-1">Register</Link>
+            </p>
+        </form>
+    </div>
+   </section>
   )
 }
 

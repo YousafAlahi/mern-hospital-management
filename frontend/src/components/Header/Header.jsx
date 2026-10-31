@@ -1,8 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useContext } from "react";
 import logo from "../../assets/images/logo.png";
 import userImg from '../../assets/images/avatar-icon.png'
 import { NavLink, Link } from "react-router-dom";
-import {BiMenu} from 'react-icons/bi'
+import {BiMenu} from 'react-icons/bi';
+import {authContext} from '../../context/AuthContext'
 
 
 const navLinks = [
@@ -28,6 +29,7 @@ const Header = () => {
 
 const headerRef = useRef(null);
 const menuRef = useRef(null);
+const {user, role, token} = useContext(authContext)
 
 
 const HandleStickyHeader = () => {
@@ -77,17 +79,25 @@ const toggleMenu = () => menuRef.current.classList.toggle('show_menu')
             {/* ==========Menu Section Ennd ======== */}
             {/* ==========Nav right start======== */}
             <div className="flex items-center gap-4">
-                  <div className="hidden">
-                    <Link to='/'>
-                    <figure>
-                      <img src={userImg} className="w-full rounded-full cursor-pointer"/>
-                    </figure>
-                    </Link>
-                  </div>
 
+                {
+                  token && user ? (
+                  <div>
+                    <Link to={`${role === 'doctor' ? '/doctor/profile/me' : '/users/profile/me'}`}>
+                    <figure>
+                      <img src={user.photo} className="w-full rounded-full cursor-pointer"/>
+                    </figure>
+                    {user?.name}
+                    </Link>
+                  </div> 
+                  ): (
                 <Link to='/login'>
                 <button className="bg-primary py-4 px-8 text-white font-[600px] h-[60] flex items-center rounded-[50px]">Login</button>
-                </Link>
+                </Link>)
+                }
+
+                 
+
                 <span className="md:hidden" onClick={toggleMenu}>
                   <BiMenu className="w-6 h-6 cursor-pointer"/>
                 </span>
